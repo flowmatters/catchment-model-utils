@@ -1,7 +1,7 @@
 from collections import defaultdict
 import pandas as pd
 
-DR_TOLERANCE=1e-2
+DR_WARNING_TOLERANCE=1e-2 # 1%
 
 def _find_starting_points(connectivity):
     conn = connectivity.transpose()
@@ -20,13 +20,11 @@ def _compute_dr(site,ds_sites,result,connectivity,local_inputs,outputs,outlet):
         if total_input==0.0:
             print(f'At {site}, output is {total_output}, but total_input is 0.0')
         dr = total_output/total_input
-        # if (dr > 1) and (dr < (1+DR_TOLERANCE)):
-        #     dr = 1
-        # if dr > 1:
-        #     print(f'At {site}, output is {total_output}, but total_input is {total_input}, yield a ratio of {dr}')
-        #     print(f'local:{local_inputs[site]},non_local:{non_local_inputs}')
-        #     print(f'upstream sites: {upstream_sites}')
-        #     # assert False
+        if dr > (1+DR_WARNING_TOLERANCE):
+            print(f'At {site}, output is {total_output}, but total_input is {total_input}, yield a ratio of {dr}')
+            print(f'local:{local_inputs[site]},non_local:{non_local_inputs}')
+            print(f'upstream sites: {upstream_sites}')
+
     result.loc[site,site]=dr
     for (ds_site,existing_dr) in ds_sites:
         result.loc[site,ds_site] = existing_dr * dr
